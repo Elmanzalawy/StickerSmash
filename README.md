@@ -3,6 +3,13 @@
 
 Once the user selects an image, they'll be able to select and add a sticker to the image.</p>
 
+<div align='center'>
+  
+  ![image](https://github.com/Elmanzalawy/StickerSmash/assets/42661153/16979af0-de33-4eef-be76-da0ce2b635dd)
+  ![image](https://github.com/Elmanzalawy/StickerSmash/assets/42661153/a17962b0-821d-45fd-b593-90646a55f069)
+</div>
+
+
 #### Installation
 
 - Install node modules:
