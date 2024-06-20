@@ -1,7 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Image, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as MediaLibrary from 'expo-media-library';
+import { captureRef } from 'react-native-view-shot';
 
 import ImageViewer from './components/ImageViewer';
 import Button from './components/Button';
@@ -10,7 +13,6 @@ import CircleButton from './components/CircleButton';
 import EmojiPicker from './components/EmojiPicker';
 import EmojiList from './components/EmojiList';
 import EmojiSticker from './components/EmojiSticker';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // const placeholderImage = 
 const PlaceholderImage = require('./assets/images/background-image.png');
@@ -20,6 +22,9 @@ export default function App() {
   const [showAppOptions, setShowAppOptions] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [pickedEmoji, setPickedEmoji] = useState(null);
+  const [permissionStatus, requestPermission] = MediaLibrary.usePermissions();
+
+  const imageRef = useRef();
 
   const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -36,6 +41,10 @@ export default function App() {
     }
   }
 
+  if (permissionStatus === null) {
+    requestPermission(); // Once permission is given, the value of the status changes to granted.
+  }
+
   const onReset = () => {
     setShowAppOptions(false);
   };
@@ -49,17 +58,32 @@ export default function App() {
   }
 
   const onSaveImageAsync = async () => {
+    try {
+      const localUri = await captureRef(imageRef, {
+        height: 440,
+        quality: 1,
+      });
 
+      await MediaLibrary.saveToLibraryAsync(localUri);
+      if (localUri) {
+        alert('Image saved!');
+      }
+    } catch (e) {
+      alert('An error has occured.');
+      console.log(e);
+    }
   };
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.imageContainer}>
-        <ImageViewer
-          placeholderImageSource={PlaceholderImage}
-          selectedImage={selectedImage}
-        />
-        {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+        <View ref={imageRef} collapsable={false}>
+          <ImageViewer
+            placeholderImageSource={PlaceholderImage}
+            selectedImage={selectedImage}
+          />
+          {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+        </View>
       </View>
       {showAppOptions ? (
         <View style={styles.optionsContainer}>
